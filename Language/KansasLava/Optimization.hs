@@ -64,6 +64,13 @@ instance Monad Opt where
     (Opt a n) >>= k = case k a of
 	 		Opt r m -> Opt r (n + m)
 
+instance Applicative Opt where
+  pure = return
+  (<*>) = ap
+
+instance Functor Opt where
+  fmap = liftM
+
 
 ----------------------------------------------------------------------
 

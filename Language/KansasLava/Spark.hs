@@ -13,6 +13,7 @@ import Data.Boolean
 
 import Data.Sized.Unsigned
 
+import Control.Monad
 import Control.Monad.Fix
 
 import Data.Singletons
@@ -117,13 +118,13 @@ data STMT :: * -> * -> * where
         RETURN :: a -> STMT c a
         BIND   :: STMT c a -> (a -> STMT c b) -> STMT c b
         MFIX   :: (a -> STMT c a) -> STMT c a
-
+{-
 instance Monad (STMT c) where
         return = RETURN
         (>>=) = BIND
 instance MonadFix (STMT c) where
         mfix = MFIX
-
+-}
 data SMState m = SMState
         { pc_reg :: REG (LocalClock m) U8
         , pc_sig :: Signal (LocalClock m) U8
@@ -134,6 +135,11 @@ data SMState m = SMState
 
 data SparkMonad m a = SparkMonad { runSparkMonad :: SMState m -> (a,SMState m) }
 
+instance Functor (SparkMonad m) where
+        fmap f (SparkMonad m) = SparkMonad $ \st -> let (a , st') = m st in (f a, st')
+instance Applicative (SparkMonad m) where
+        pure = return
+        (<*>) = ap
 instance Monad (SparkMonad m) where
         return a = SparkMonad $ \ st -> (a,st)
         (SparkMonad m) >>= k = SparkMonad $ \ st -> case m st of
@@ -244,6 +250,11 @@ data RMState m = RMState
 
 data RuleMonad m a = RuleMonad { runRuleMonad :: RMState m -> (a,RMState m) }
 
+instance Functor (RuleMonad m) where
+        fmap f (RuleMonad m) = RuleMonad $ \st -> let (a , st') = m st in (f a, st')
+instance Applicative (RuleMonad m) where
+        pure = return
+        (<*>) = ap
 instance Monad (RuleMonad m) where
         return a = RuleMonad $ \ st -> (a,st)
         (RuleMonad m) >>= k = RuleMonad $ \ st -> case m st of

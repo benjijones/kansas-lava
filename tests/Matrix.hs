@@ -15,6 +15,7 @@ import GHC.TypeLits
 
 type List a = [a]
 
+
 type instance (1 + 1) = 2
 type instance (1 + 3) = 4
 type instance (2 * 4) = 8
@@ -46,8 +47,7 @@ tests = do
         t2 "X3xU4" (allCases :: List (M.Vector 3 U4))
 
         let t3 :: (Rep w, Show w, SingI (1 + W w)) => String -> List (Maybe w) -> Tests ()
-	    t3 str arb = testMatrix3 str arb
-
+	   t3 str arb = testMatrix3 str arb
         t3 "U3" (allCases :: List (Maybe U3))
         t3 "Bool" (allCases :: List (Maybe Bool))
 
